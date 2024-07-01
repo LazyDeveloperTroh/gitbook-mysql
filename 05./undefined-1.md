@@ -50,7 +50,7 @@ InnoDB 스토리지 엔진은 스토리지 엔진 내부에서 레코드 기반�
 
 레코드 자체만 잠그는 것을 레코드 락이라고 한다. <mark style="background-color:green;">**InnoDB 스토리지 엔진은 레코드 자체가 아니라 인덱스의 레코드를 잠그는 특징이 있다. 인덱스가 하나도 없는 테이블이더라도 내부적으로 자동 생성된 클러스터 인덱스를 이용해 잠금을 설정한다.**</mark>
 
-
+[undefined-2.md](undefined-2.md "mention")
 
 #### 갭 락
 
