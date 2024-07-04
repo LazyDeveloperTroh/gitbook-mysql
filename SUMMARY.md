@@ -3,6 +3,8 @@
 ## 04. 아키텍처
 
 * [엔진](README.md)
+  * [InnoDB 스토리지 엔진](04./engine/innodb.md)
+  * [InnoDB 스토리지 엔진 - 버퍼풀](04./engine/innodb-1.md)
 * [스레딩 구조](04./undefined.md)
 * [메모리](04./undefined-1.md)
 * [쿼리 실행 구조](04./undefined-2.md)
