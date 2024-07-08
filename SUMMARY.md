@@ -17,4 +17,6 @@
 
 ## 인덱스 <a href="#index" id="index"></a>
 
-* [인덱스](index/disk.md)
+* [읽기방식](index/disk.md)
+* [인덱스](index/b-tree/README.md)
+  * [B-Tree 인덱스(Balanced-Tree)](index/b-tree/b-tree-balanced-tree.md)
