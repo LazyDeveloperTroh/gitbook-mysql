@@ -33,3 +33,17 @@ SELECT * FROM employees WHERE first_name BETWEEN 'Ebbe' AND 'Gad';
 #### 커버링 인덱스
 
 쿼리가 필요로 하는 데이터에 따라 데이터 파일을 탐색하는 과정이 필요하지 않을 수 있는데 이를 커버링 인덱스라고 한다.&#x20;
+
+
+
+### 인덱스 풀 스캔
+
+<mark style="background-color:blue;">인덱스 레인지 스캔과 달리 인덱스의 처음부터 끝까지 모두 읽는 방식을 인덱스 풀 스캔이라고 한다.</mark> 대표적으로 쿼리의 조건절에 사용된 칼럼이 인덱스의 첫 번째 칼럼이 아닌 경우 인덱스 풀 스캔 방식이 사용된다. 예를 들어, 인덱스는 (A, B, C) 칼럼의 순서로 만들어져 있지만 쿼리의 조건절은 B칼럼이나 C칼럼으로 검색하는 경우다. \
+\
+<mark style="background-color:blue;">쿼리가 인덱스에 명시된 칼럼만으로  조건을 처리할 수 있는 경우에 주로 사용되며 인덱스 뿐만 아니라 데이터 레코드까지 모두 읽어야  한다면 절대 이 방식으로 처리되지 않는다.</mark> 이 방식은 인덱스 레인지 스캔보다는 빠르지 않지만 테이블 풀 스캔보다는 효율적이다.
+
+<div align="left">
+
+<figure><img src="../../.gitbook/assets/mysql-rangefullscan.drawio.png" alt=""><figcaption></figcaption></figure>
+
+</div>

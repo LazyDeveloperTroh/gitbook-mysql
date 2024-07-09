@@ -1,4 +1,4 @@
-# B-Tree 인덱스(Balanced-Tree)
+# B-Tree 인덱스
 
 ### B-Tree 인덱스
 
