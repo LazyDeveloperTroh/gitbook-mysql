@@ -47,3 +47,51 @@ SELECT * FROM employees WHERE first_name BETWEEN 'Ebbe' AND 'Gad';
 <figure><img src="../../.gitbook/assets/mysql-rangefullscan.drawio.png" alt=""><figcaption></figcaption></figure>
 
 </div>
+
+### 루스 인덱스 스캔
+
+<mark style="background-color:blue;">루스 인덱스 스캔은 인덱스 레인지 스캔과 비슷하게 작동하지만 중간에 필요치 않은 인덱스 키 값은 무시하고 다음으로 넘어가는 형태로 처리한다.</mark> 일반적으로 GROUP BY 또는 집합 함수 가운데 MAX() 또는 MIN() 함수에 대해 최적화를 하는 경우에 사용된다.
+
+```sql
+SELECT dept_no, MIN(emp_no) 
+FROM dept_emp
+WHERE dep_no BETWEEN 'd002' AND 'd004'
+GROUP BY dept_no;
+```
+
+위 쿼리에서 사용된 dept\_emp 테이블에는 (dept\_no, emp\_no) 조합으로 인덱스가 생성되어 있다고 해보자. 그렇다면 인덱스는 모두 정렬된 상태이기 때문에 dep\_no 그룹에서 첫 번째 레코드의 emp\_no 만 읽으면 되기 때문에 나머지 레코드는 건너뛰면서 성능을 향상 시키도록 동작한다.
+
+
+
+### 인덱스 스킵 스캔
+
+<mark style="background-color:blue;">인덱스의 핵심은 값이 정렬돼 있다는 것이며, 이로 인해 인덱스를 구성하는 칼럼의 순서가 매우 중요하다.</mark> 예를 들어 다음과 같은 인덱스가 있다고 가정해보자.
+
+```sql
+ALTER TABLE employees
+    ADD INDEX ix_gender_birthdate (gender, birth_date);
+```
+
+\
+<mark style="background-color:blue;">이 인덱스를 사용하려면 WHERE 조건절에 gender 칼럼에 대한 비교가 필수로 들어가야만 했다.</mark> 하지만 MySQL 8.0 버전부터는 <mark style="background-color:blue;">옵티마이저가 gender 칼럼을 건너뛰어서 birth\_date 칼럼만으로 인덱스 검색이 가능하게 해주는 인덱스 스킵 스캔 최적화 기능이 도입되었다.</mark>
+
+```sql
+// 인덱스를 사용하지 못하는 쿼리
+SELECT * FROM employees WHERE birth_date >='1965-02-01';
+
+// 인덱스를 사용할 수 있는 쿼리
+SELECT * FROM employees WHERE gende='M' AND birth_date >='1965-02-01';
+```
+
+<mark style="background-color:blue;">인덱스 스킵 스캔의 동작 방식에 대해 알아보자. MySQL 옵티마이저는 우선 gender 칼럼에서 유니크한 값을 모두 조회해서 주어진 쿼리에 gender 칼럼의 조건을 추가해서 쿼리를 다시 실행하는 형태로 처리한다.</mark>
+
+<div align="left">
+
+<figure><img src="../../.gitbook/assets/mysql-indexskipscan.drawio.png" alt=""><figcaption></figcaption></figure>
+
+</div>
+
+인덱스 스킵 스캔은 다음과 같은 단점이 있다.
+
+1. WHERE 조건 절에 조건이 없는 인덱스의 선행 칼럼의 유니크한 값의 개수가 적어야 한다.
+2. 쿼리가 인덱스에 존재하는 칼럼만으로 처리가 가능해야 인덱스 스킵 스캔을 사용할 수 있다.
