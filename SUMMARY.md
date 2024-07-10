@@ -22,3 +22,4 @@
   * [B-Tree 인덱스](index/b-tree/b-tree-balanced-tree.md)
   * [인덱스 사용에 영향을 미치는 요소](index/b-tree/undefined.md)
   * [B-Tree 인덱스를 통한 데이터 읽기](index/b-tree/b-tree-1.md)
+  * [인덱스의 정렬 및 스캔 방향](index/b-tree/undefined-1.md)
