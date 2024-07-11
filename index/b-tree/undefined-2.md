@@ -59,3 +59,87 @@ SELECT * FROM dept_emp WHERE emp_no >= 10144;
 ```
 
 <mark style="background-color:blue;">인덱스가 (dept\_no, emp\_no) 칼럼 순서대로 생성돼 있다면 인덱스의 선행 칼럼인 dept\_no 조건 없이 emp\_no 값으로만 검색하면 인덱스를 효율적으로 사용할 수 없다</mark>. 케이스 B의 인덱스는 다중 칼럼으로 구성된 인덱스이므로 dept\_no 칼럼에 대해 먼저 정렬한 후, 다시 emp\_no 칼럼 값으로 정렬돼 있기 때문이다.
+
+
+
+### 가용성과 효율성 판단
+
+<mark style="background-color:blue;">다음과 같은 조건에서는 인덱스를 작업 범위 결정 조건으로 사용할 수 없다.</mark>&#x20;
+
+
+
+* **NOT-EQUAL 로 비교된 경우("<>", "NOT IN", "NOT BETWEEN", "IS NOT NULL")**
+
+```sql
+... WHERE column <> 'N';
+... WHERE column NOT IN (10, 11, 12)
+... WHERE column IS NOT NULL
+```
+
+* **LIKE '%??' 형태로 문자열 패턴이 비교된 경우**
+
+```sql
+... WHERE column LIKE '%승환'
+... WHERE column LIKE '_승환'
+... WHERE column LIKE '%승%'
+```
+
+* **스토어드 함수나 다른 연산자로 인덱스 칼럼이 변형된 후 비교된 경우**
+
+```sql
+... WHERE SUBSTRING(column, 1, 1) = 'X'
+... WHERE DAYOFMONTH(column) = 1
+```
+
+* NOT-DETERMINISTIC 속성의 스토어드 함수가 비교 조건에 사용된 경우
+
+```sql
+... WHERE column = deterministic_function()
+```
+
+* **데이터 타입이 서로 다른 비교(인덱스 칼럼의 타입을 변환해야 비교가 가능한 경우)**
+
+```sql
+... WHERE char_column = 10
+```
+
+* 문자열 데이터 타입의 콜레이션이 다른 경우
+
+```sql
+... WHERE utf8_bin_char_column = euckr_bin_char_column
+```
+
+
+
+#### 다중 컬럼의 인덱스 사용 조건
+
+```sql
+INDEX ix_test (column_1, column_2, column_3, ... column_n)
+```
+
+* <mark style="background-color:blue;">작업 범위 인덱스로 사용하지 못하는 경우</mark>
+  * column\_1 칼럼에  대한 조건이 없는 경우
+  * column\_1 칼럼의 비교 조건이 위의 인덱스 사용 불가 조건 중 하나인 경우
+* <mark style="background-color:blue;">작업 범위 결정 조건으로 인덱스를 사용하는 경우(i는 2보다 크고 n보다 작은 임의의 값)</mark>
+  * column\_1 \~ column\_(i-1) 칼럼까지 동등 비교 형태("=" 또는 "IN")로 비교
+  * column\_i 칼럼에 대해 다음 연산자 중 하나로 비교
+    * 동등 비교("=" 또는 "IN")
+    * 크다 작다 형태(">" 또는 "<")
+    * LIKE로 좌측 일치 패턴(LIKE '승환%')
+
+```sql
+// 인덱스 사용할 수 없음
+... WHERE column_1 <> 2;
+
+// column_1과 column_2까지 범위 결정 조건으로 사용됨
+... WHERE column_1 = 1 AND column_2 > 10
+
+// column_1, column_2, column_3 까지 범위 결정 조건으로 사용됨
+... WHERE column_1 IN (1,2) AND column_2 = 2 AND column_3 <= 10
+
+// column_1, column_2, column_3 까지 범위 결정 조건으로, column_4는 체크 조건으로 사용됨
+... WHERE column_1 = 1 AND column_2 = 2 AND column_3 IN (10, 20, 30) AND column_4 <> 100
+
+// column_1, column_2, column_3, column_4 까지 범위 결정 조건으로 사용됨
+... WHERE column_1 = 1 AND column_2 IN (2,4) AND column_3 = 30 AND column_4 LIKE '김승%';
+```
