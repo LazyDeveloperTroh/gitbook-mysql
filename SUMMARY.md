@@ -24,3 +24,4 @@
   * [B-Tree 인덱스를 통한 데이터 읽기](index/b-tree/b-tree-1.md)
   * [인덱스의 정렬 및 스캔 방향](index/b-tree/undefined-1.md)
   * [인덱스의 가용성과 효율성](index/b-tree/undefined-2.md)
+  * [클러스터링 인덱스](index/b-tree/undefined-3.md)
